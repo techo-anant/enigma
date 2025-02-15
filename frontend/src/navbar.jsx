@@ -6,9 +6,9 @@ const navbar = () => {
             <div class="logo">StudyTool</div>
             <ul class="nav-links">
                 <li><a href="#">Home</a></li>
-                <li><a href="#">Study Map</a></li>
-                <li><a href="#">Calendar</a></li>
-                <li><a href="#">Notes</a></li>
+                <li><a href="http://localhost:5173/UploadICS">Upload ics</a></li>
+                <li><a href="http://localhost:5173/calendar">Calendar</a></li>
+                <li><a href="http://localhost:5173/CreateEvent">Create Event</a></li>
                 <li><a href="#">Exam Prep</a></li>
                 <li><a href="#">Achievements</a></li>
             </ul>
