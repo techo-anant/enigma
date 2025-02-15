@@ -11,7 +11,76 @@ body {
 .navbar {
     display: flex;
     justify-content: space-between;
+    align-items: center;/* General Styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding-top: 55px; 
+}
+
+/* Navbar Styling */
+.navbar {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    padding: 10px 30px;
+    height: 60px;
+    color: white;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+/* StudyTool Logo */
+.logo {
+    font-size: 22px; 
+    font-weight: bold;
+    display: flex; 
+    align-items: center; 
+    height: 100%;
+    line-height: 1; 
+}
+
+/* Navigation Links */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 3px;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-links li {
+    display: inline;
+}
+
+
+.nav-links a {
+    text-decoration: none;
+    color: white;
+    font-size: 17px;
+    padding: 11px 19px;
+    transition: 0.3s ease-in-out;
+    border: 2px solid transparent; 
+    display: inline-block; 
+    text-align: center; 
+    min-width: 90px; /* Adjust this to set a uniform size */
+}
+
+
+
+.nav-links a:hover {
+    border: 2px solid white; 
+    border-radius: 4px;
+    background: transparent; 
+}
+
     background: linear-gradient(135deg, #3498db, #2ecc71);
     padding: 25px 20px;
     color: white;
