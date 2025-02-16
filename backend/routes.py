@@ -1,20 +1,104 @@
-from flask import request, jsonify, current_app
+from flask import request, jsonify, current_app, render_template
 from werkzeug.utils import secure_filename
-from datetime import *
-from sqlalchemy import cast, Date, func
 import os
-from icalendar import Calendar, Event
-from . import app, db
-from .services import extract_text_from_pdf
 from .model import StudyEvent, CalendarEvent
+import datetime
+from datetime import datetime
+from icalendar import Calendar
+from backend import db, app
+from backend.model import CalendarEvent, StudyEvent, User
+from flask import current_app
+from flask_login import login_user, logout_user
+from flask_login import login_required, current_user
+from services import extract_text_from_pdf, summarize
 
+@app.route("/login", methods=["POST"])
+def login():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        # Extract user details
+        user_email = data.get("email")
+        user_name = data.get("name")
+        user_image = data.get("image", "default.jpg")  # Default profile image
+
+        if not user_email or not user_name:
+            return jsonify({'error': 'Missing required fields'}), 400
+
+        # Check if the user already exists
+        user = User.query.filter_by(email=user_email).first()
+
+        if not user:
+            # Create new user
+            user = User(
+                name=user_name,
+                email=user_email,
+                image_file=user_image,
+                Level=1,  # Default level
+                experience=0  # Default experience
+            )
+            db.session.add(user)
+            db.session.commit()
+
+        # Log the user in
+        login_user(user)
+
+        # Fetch user's StudyEvents and CalendarEvents
+        study_events = StudyEvent.query.filter_by(user_id=user.id).all()
+        calendar_events = CalendarEvent.query.filter_by(user_id=user.id).all()
+
+        # Format events for JSON response
+        study_events_data = [
+            {
+                "id": event.id,
+                "title": event.title,
+                "description": event.description,
+                "start_time": event.start_time.isoformat(),
+                "end_time": event.end_time.isoformat() if event.end_time else None,
+                "link": event.link
+            }
+            for event in study_events
+        ]
+
+        calendar_events_data = [
+            {
+                "id": event.id,
+                "title": event.title,
+                "description": event.description,
+                "start_time": event.start_time.isoformat(),
+                "end_time": event.end_time.isoformat() if event.end_time else None,
+                "location": event.location
+            }
+            for event in calendar_events
+        ]
+
+        return jsonify({
+            "message": "Login successful",
+            "user": {
+                "id": user.id,
+                "name": user.name,
+                "email": user.email,
+                "image": user.image_file,
+                "level": user.Level,
+                "experience": user.experience
+            },
+            "study_events": study_events_data,
+            "calendar_events": calendar_events_data
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 def parse_ics(file_path):
     events_list = []
-
     try:
         with open(file_path, "rb") as f:
             calendar = Calendar.from_ical(f.read())
+
+        if not current_user.is_authenticated:
+            return {"error": "User not authenticated"}, 401  # Ensure user is logged in
 
         with app.app_context():  # Ensure database operations are inside app context
             for component in calendar.walk():
@@ -23,25 +107,41 @@ def parse_ics(file_path):
                         start_time = component.get("dtstart").dt
                         end_time = component.get("dtend").dt if component.get("dtend") else None
 
+                        # Ensure correct datetime formatting
                         if isinstance(start_time, datetime.date) and not isinstance(start_time, datetime.datetime):
-                            start_time = datetime.datetime.combine(start_time, datetime.time.min)
+                            start_time = datetime.combine(start_time, datetime.min.time())
                         if end_time and isinstance(end_time, datetime.date) and not isinstance(end_time, datetime.datetime):
-                            end_time = datetime.datetime.combine(end_time, datetime.time.min)
+                            end_time = datetime.combine(end_time, datetime.min.time())
 
-                        new_event = CalendarEvent(
+                        # Check if the event already exists for the user
+                        existing_event = CalendarEvent.query.filter_by(
                             title=str(component.get("summary", "No Title")),
-                            description=str(component.get("description", "No Description")),
-                            start_time=start_time.isoformat(),
-                            end_time=end_time.isoformat() if end_time else None,
-                            location=str(component.get("location", "No Location")),
-                        )
+                            start_time=start_time,
+                            user_id=current_user.id  # Check if the user already has this event
+                        ).first()
 
-                        db.session.add(new_event)
+                        if existing_event:
+                            # Update existing event
+                            existing_event.description = str(component.get("description", "No Description"))
+                            existing_event.end_time = end_time
+                            existing_event.location = str(component.get("location", "No Location"))
+                        else:
+                            # Create new event
+                            new_event = CalendarEvent(
+                                title=str(component.get("summary", "No Title")),
+                                description=str(component.get("description", "No Description")),
+                                start_time=start_time,
+                                end_time=end_time,
+                                location=str(component.get("location", "No Location")),
+                                user_id=current_user.id  # Associate event with user
+                            )
+                            db.session.add(new_event)
+
                         events_list.append({
-                            "title": new_event.title,
+                            "title": str(component.get("summary", "No Title")),
                             "start_time": start_time.isoformat(),
                             "end_time": end_time.isoformat() if end_time else None,
-                            "location": new_event.location
+                            "location": str(component.get("location", "No Location"))
                         })
 
                     except Exception as e:
@@ -57,43 +157,6 @@ def parse_ics(file_path):
         raise
 
     return events_list
-
-# Assuming necessary imports for db, models, and services are properly set up
-
-# Routes for calendar events and ICS processing
-@app.route('/add_events', methods=['POST'])
-def add_events():
-    try:
-        data = request.json
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
-
-        # Validate required fields
-        required_fields = ['title', 'start_time']
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
-
-        # Create new event
-        new_event = StudyEvent(
-            title=data["title"],
-            description=data.get("description", ""),
-            start_time=datetime.datetime.fromisoformat(data["start_time"]),
-            end_time=datetime.datetime.fromisoformat(data["end_time"]) if data.get("end_time") else None,
-            link=data.get("link", ""),
-        )
-
-        db.session.add(new_event)  # Fixed missing argument
-        db.session.commit()
-        return jsonify({
-            "message": "Event added!",
-            "event_id": new_event.id  # Proper JSON structure
-        }), 201  # Use 201 Created for new resources
-
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
 
 @app.route("/upload-ics", methods=["POST", "GET"])
 def upload_ics():
@@ -144,7 +207,7 @@ def get_events():
             # ✅ Convert `start_time` to datetime object before filtering
             events = [
                 event for event in all_events
-                if str(event.start_time.date()) == selected_date
+                if event.start_time.date() == selected_date
             ]
 
             print(f"\n✅ Found {len(events)} matching events.")
@@ -168,3 +231,85 @@ def get_events():
     ]
 
     return jsonify(events_data), 200
+
+@app.route("/list_events", methods=["GET"])
+def events():
+    events = CalendarEvent.query.all()
+    return render_template("index.html", events=events, title = "events")
+
+@app.route('/add_events', methods=['POST'])
+@login_required  # Ensures only logged-in users can add events
+def add_events():
+    try:
+        data = request.json
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+
+        # Validate required fields
+        required_fields = ['title', 'start_time']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+
+        # Ensure the user is logged in
+        if not current_user.is_authenticated:
+            return jsonify({'error': 'User not authenticated'}), 401
+
+        # Create new event linked to the current user
+        new_event = StudyEvent(
+            title=data["title"],
+            description=data.get("description", ""),
+            start_time=datetime.fromisoformat(data["start_time"]),
+            end_time=datetime.fromisoformat(data["end_time"]) if data.get("end_time") else None,
+            link=data.get("link", ""),
+            user_id=current_user.id  # Associate the event with the logged-in user
+        )
+
+        # Add to the database
+        db.session.add(new_event)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Event added!",
+            "event_id": new_event.id,
+            "user_id": current_user.id  # Confirming event is linked to user
+        }), 201  # 201 Created status
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+@app.route("/upload-pdf", methods=["POST"])
+def upload_pdf():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "Empty filename"}), 400
+
+    try:
+        # Save the uploaded file
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        file.save(file_path)
+
+        # Extract text from PDF
+        extracted_text = extract_text_from_pdf(file_path)
+
+        if not extracted_text:
+            return jsonify({"error": "Failed to extract text from the PDF"}), 500
+
+        # Summarize extracted text
+        summary_response = summarize(extracted_text)
+
+        return jsonify({
+            "message": "Summarization completed",
+            "summary": summary_response.get("generated_text", "Summarization failed"),
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        # Cleanup: Remove the uploaded file after processing
+        if os.path.exists(file_path):
+            os.remove(file_path)

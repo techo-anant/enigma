@@ -1,0 +1,25 @@
+<!-- templates/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if title %}Flask {{ title }}{% else %}Event List{% endif %}</title>
+</head>
+<body>
+    <h1>Event List</h1>
+    <ul>
+        {% for event in events %}
+            <li>
+                <strong>{{ event.title }}</strong><br>
+                📅 Start: {{ event.start_time }}<br>
+                ⏳ End: {{ event.end_time if event.end_time else "N/A" }}<br>
+                📍 Location: {{ event.location }}<br>
+                📝 Description: {{ event.description if event.description else "No description" }}
+            </li>
+        {% else %}
+            <p>No events found.</p>
+        {% endfor %}
+    </ul>
+</body>
+</html>
