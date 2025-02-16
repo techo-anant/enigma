@@ -5,6 +5,8 @@ import UploadICS from "./UploadICS";
 import CreateEvent from "./CreateEvent";
 import BigCalendar from "./BigCalendar";
 import Achievements from "./Achievements";
+import ExamPrep from "./ExamPrep";
+import Login from "./Login";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
         <Route path="/navbar" element={<Navbar />} />
         <Route path="/CreateEvent" element={<CreateEvent />} />
         <Route path="/BigCalendar" element={<BigCalendar />} />
+        <Route path="/ExamPrep" element={<ExamPrep />} />
+        <Route path="/Login" element={<Login />} />
         <Route path="/Achievements" element={<Achievements />} />
       </Routes>
     </Router>

@@ -3,6 +3,7 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import axios from "axios";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import './BigCalendar.css';
 
 const localizer = momentLocalizer(moment);
 
@@ -49,8 +50,8 @@ const BigCalendar = () => {
     };
 
     return (
-        <div style={{ height: "600px", padding: "20px", color: "black" }}>
-            <h2>📅 Event Calendar</h2>
+        <div className="calendar-container">
+            <span id="cal-name">Event Calendar</span>
             <Calendar
                 localizer={localizer}
                 events={events}

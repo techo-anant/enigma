@@ -4,26 +4,29 @@
     justify-content: center;
     align-items: center;
     height: 90vh;
-    background-color: #f4f4f4; /* Light background for contrast */
+    background-color: #f4f4f4;
+    /* Light background for contrast */
 }
 
 /* Centering the upload container */
 .upload-container {
-    width: 40vw;
+    height: 60vh;
+    width: 38vw;
     min-width: 320px;
-    padding: 4vh;
+    padding: 10vh;
+    padding-left: 5vh;
+    padding-right: 5vh;
     background: white;
     border-radius: 1.5rem;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
     text-align: center;
-    
+
     /* FLEXBOX CENTERING */
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
-
 
 /* Heading Styles */
 .upload-container h2 {
@@ -35,26 +38,29 @@
 /* File Input Styling */
 .file-input {
     display: block;
-    width: 80%;  /* Reduce width to make it centered */
-    max-width: 350px; /* Prevent it from becoming too large */
-    padding: 1rem;
+    width: 90%;
+    /* Ensure it takes full width */
+    max-width: 350px;
+    /* Prevent excessive width */
     border: 0.2rem solid #3498db;
     border-radius: 0.5rem;
-    margin: 0 auto 2vh auto; /* Auto margin for centering */
+    margin: 0 auto 2vh auto;
+    /* Centers the input */
     cursor: pointer;
     outline: none;
     font-size: 1rem;
     background: #f9f9f9;
-    text-align: center;
+    padding: 0.4rem;
+    /* Reduce padding to prevent shifting */
 }
 
-
-/* Custom Styling for File Input Button */
+/* Fix for File Input Button Alignment */
 .file-input::-webkit-file-upload-button {
     background: #3498db;
     color: white;
     border: none;
-    padding: 0.8rem 1.5rem;
+    padding: 0.5rem 1rem;
+    /* Reduce padding */
     border-radius: 0.5rem;
     cursor: pointer;
     font-size: 1rem;
@@ -79,6 +85,7 @@
     max-width: 250px;
     display: block;
     margin: 1vh auto;
+    /* Keeps button properly spaced */
 }
 
 .upload-button:hover {

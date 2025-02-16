@@ -1,0 +1,111 @@
+/* ChatGPT-style interface - Full Screen */
+.chat-container {
+    width: 100vw;
+    min-height: 92vh;
+    /* Ensures full page height */
+    top: 0;
+    background: #f4f4f4;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 8vh;
+}
+
+/* Chat Box - Full Width & Scrollable */
+.chat-box {
+    width: 100vw;
+    /* Fully spread width */
+    height: 70vh;
+    /* Keeps it long but not too much */
+    overflow-y: auto;
+    /* Enables scrolling inside chat */
+    background: #ffffff;
+    border: 1px solid #444;
+    position: relative;
+    /* Keeps it below navbar */
+    z-index: 5;
+}
+
+/* Chat Messages */
+.chat-message {
+    color: #333;
+    padding: 8px 12px;
+    margin: 5px 0;
+    max-width: 80%;
+}
+
+.chat-message.user {
+    background: #000000;
+    color: #333;
+    align-self: flex-end;
+    text-align: right;
+}
+
+.chat-message.ai {
+    background: #444;
+    color: #333;
+}
+
+.chat-message.system {
+    background: #ffcc00;
+    color: #333;
+}
+
+/* Upload Section - Below Chat */
+.upload-section {
+    width: 50%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* Dropzone for File Upload */
+.dropzone {
+    width: 100%;
+    padding: 15px;
+    border: 2px dashed #000000;
+    text-align: center;
+    cursor: pointer;
+    background: #1e1e1e;
+}
+
+#summary {
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    margin: 0;
+    border-radius: 0;
+}
+
+
+/* Flashcard Input Section */
+.flashcard-input {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    bottom: 0;
+}
+
+
+#flash-button {
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    margin: 0;
+    width: 50%;
+    margin-top: 4px;
+    margin-bottom: 8.1px;
+}
+
+.flash-text {
+    margin: 0;
+    padding: 0;
+    font-size: 1rem;
+    color: #333;
+    width: 50%;
+    margin-top: 4px;
+}

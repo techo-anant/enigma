@@ -1,3 +1,76 @@
-.body {
+body {
+    padding-top: 8vh;
+    display: grid;
+    place-items: center;
+    background-color: #f4f4f4
+}
+
+.calendar-container {
     color: black;
+    display: grid;
+    place-items: center;
+    padding: 2rem 2rem;
+    background-color: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: #f0f0f0;
+}
+
+#cal-name {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.rbc-btn-group {
+    display: flex;
+    justify-content: center;
+}
+
+.rbc-toolbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.rbc-toolbar-label {
+    min-width: 15rem;
+}
+
+/* .rbs-header {
+    padding: 4px 4px;
+} */
+
+
+
+.rbc-calendar {
+    width: 100%
+}
+
+.rbc-button-link {
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.rbc-button-link:hover {
+    background-color: inherit;
+}
+
+.rbc-header {
+    border-bottom: none;
+}
+
+.rbc-time-header-cell {
+    padding: 2px;
 }
