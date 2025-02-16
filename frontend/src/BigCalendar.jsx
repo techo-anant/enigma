@@ -33,11 +33,17 @@ const BigCalendar = () => {
 
         try {
             const response = await axios.get(`http://localhost:5000/events?date=${formattedDate}`);
+
+            // ✅ Ensure correct mapping from Flask API response
             const selectedEvents = response.data.map(event => ({
-                ...event,
-                start: new Date(event.start),
-                end: new Date(event.end),
+                id: event.id,
+                title: event.title,
+                start: moment(event.start_time).toDate(),  // Convert ISO 8601 string to Date
+                end: event.end_time ? moment(event.end_time).toDate() : null,
+                description: event.description,
+                location: event.location
             }));
+
             setFilteredEvents(selectedEvents);
         } catch (error) {
             console.error("Error fetching events for date:", error);
