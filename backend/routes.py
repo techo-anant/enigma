@@ -10,7 +10,6 @@ from backend.model import CalendarEvent, StudyEvent, User
 from flask import current_app
 from flask_login import login_user, logout_user
 from flask_login import login_required, current_user
-from services import extract_text_from_pdf, summarize
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -279,37 +278,3 @@ def add_events():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@app.route("/upload-pdf", methods=["POST"])
-def upload_pdf():
-    if "file" not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
-
-    file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"error": "Empty filename"}), 400
-
-    try:
-        # Save the uploaded file
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-        file.save(file_path)
-
-        # Extract text from PDF
-        extracted_text = extract_text_from_pdf(file_path)
-
-        if not extracted_text:
-            return jsonify({"error": "Failed to extract text from the PDF"}), 500
-
-        # Summarize extracted text
-        summary_response = summarize(extracted_text)
-
-        return jsonify({
-            "message": "Summarization completed",
-            "summary": summary_response.get("generated_text", "Summarization failed"),
-        })
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    finally:
-        # Cleanup: Remove the uploaded file after processing
-        if os.path.exists(file_path):
-            os.remove(file_path)
