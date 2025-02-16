@@ -1,18 +1,22 @@
+/* General Styles */
 body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
-    padding-top: 55px;
+    padding-top: 8vh;
+    /* Adjust navbar height dynamically */
 }
+
 /* Navbar Styling */
 .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: linear-gradient(135deg, #3498db, #2ecc71);
-    padding: 10px 30px;
-    height: 60px;
+    padding: 1.5vh 3vh;
+    height: 8vh;
+    /* Navbar height in viewport height */
     color: white;
     width: 100%;
     position: fixed;
@@ -24,7 +28,8 @@ body {
 
 /* StudyTool Logo */
 .logo {
-    font-size: 22px;
+    font-size: 3vh;
+    /* Adjusted for viewport */
     font-weight: bold;
     display: flex;
     align-items: center;
@@ -36,7 +41,7 @@ body {
 .nav-links {
     list-style: none;
     display: flex;
-    gap: 3px;
+    gap: 1vh;
     padding: 0;
     margin: 0;
 }
@@ -45,25 +50,23 @@ body {
     display: inline;
 }
 
-
 .nav-links a {
     text-decoration: none;
     color: white;
-    font-size: 17px;
-    padding: 11px 19px;
+    font-size: 2vh;
+    /* Adjusted for responsiveness */
+    padding: 2vh 3vh;
     transition: 0.3s ease-in-out;
-    border: 2px solid transparent;
+    border: 0.3vh solid transparent;
     display: inline-block;
     text-align: center;
-    min-width: 90px;
-    /* Adjust this to set a uniform size */
+    min-width: 2vw;
+    /* Adjusted for uniform size */
 }
 
-
-
+/* Navbar Hover Effects */
 .nav-links a:hover {
-    border: 2px solid white;
-    border-radius: 4px;
+    border: 0.3vh solid white;
+    border-radius: 1vh;
     background: transparent;
-    scale: 1.05;
 }

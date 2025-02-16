@@ -1,15 +1,134 @@
-.achievements{
+
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh; /* Ensures the entire view is exactly the height of the device screen */
+    overflow: hidden; /* Prevents any scrolling caused by overflow */
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    top: 0;
-    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Arial', sans-serif;
+    background: #f0f2f5;
 }
 
+/* Background Image */
 .image {
-    background-image: url('/assets/bg-image.jpg');
-    /* Works if the image is in 'public/assets/' */
-    background-repeat: no-repeat;
-    height: 50vh;
-    width: 100vw; 
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 50vh; /* Adjust this to control the height of the image */
+    object-fit: cover; /* Ensures the image covers the specified area without being stretched */
+    z-index: 1; /* Keeps the background below all other content */
+}
+
+/* Profile Image */
+.photo {
+    width: 54vh; /* Large but well-balanced */
+    height: 54vh;
+    border-radius: 50%;
+    position: fixed;
+    top: 25vh;  /* Positioned slightly up */
+    right: 40%;
+    transform: translateX(-50%);
+    border: 0.5vh solid white;
+    box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.15);
+    background-color: white;
+    z-index: 2; /* Above the background image */
+}
+
+/* User Info Card */
+.data {
+    position: absolute;
+    top: 35%;
+    left: 70%;
+    transform: translate(-50%, 0%); /* Adjusts to vertically and horizontally center */
+    background: white;
+    padding: 0 0;
+    border-radius: 2vh;
+    box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.2);
+    min-width: 35vw;
+    max-width: 40vw;
+    text-align: center;
+    z-index: 2;
+}
+
+/* Styling the user data card */
+.user_data {
+    background: white;
+    padding: 5vh 6vh; /* More padding for a premium feel */
+    border-radius: 2vh;
+    box-shadow: 0 1vh 2vh rgba(0, 0, 0, 0.2); /* Stronger shadow */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 35vw;
+    max-width: 40vw;
+    text-align: center;
+    z-index: 2; /* Above the background image and profile photo */
+}
+
+/* Name */
+#name {
+    font-size: 3.2vh; /* Slightly bigger */
+    font-weight: bold;
+    color: #222;
+    margin-bottom: 0.7vh;
+}
+
+/* Email */
+#email {
+    font-size: 2.2vh;
+    color: #666;
+    margin-bottom: 2vh;
+}
+
+/* Level */
+#level {
+    font-size: 2.5vh;
+    font-weight: bold;
+    margin-top: 1vh;
+    color: #444;
+}
+
+/* ----------------- */
+/* Experience Bar */
+/* ----------------- */
+
+/* Experience Bar Container */
+#experience {
+    width: 85%;
+    max-width: 400px;
+    text-align: center;
+    margin-top: 2vh;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 2vh;
+    background-color: #e0e0e0; /* Light grey background */
+    border-radius: 1vh;
+    overflow: hidden;
+    border: 0.2vh solid #ccc;
+    box-shadow: inset 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Progress Fill (Dynamic Width) */
+.progress-fill {
+    height: 100%;
+    background-color: #f39c12; /* Orange progress */
+    border-radius: 1vh;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Experience Text */
+.exp-text {
+    font-size: 1.8vh;
+    font-weight: bold;
+    color: #333;
+    margin-top: 1vh;
+    display: block;
 }

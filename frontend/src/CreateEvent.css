@@ -1,0 +1,150 @@
+/* Reset and box-sizing setup */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Container for centering the form */
+.create-event-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    /* Ensures it covers most of the viewport height without scrolling */
+    width: 100vw;
+    padding: 2vh;
+}
+
+/* Main form styling */
+.create-event {
+    background: white;
+    padding: 4vh;
+    /* Responsive vertical padding */
+    border-radius: 2vh;
+    box-shadow: 0 0.5vh 1vh rgba(0, 0, 0, 0.1);
+    /* Soft shadow for depth */
+    width: 80vw;
+    /* Utilizes 80% of the viewport width */
+    max-width: 60vh;
+    /* Maximum width to avoid overly wide forms */
+    text-align: center;
+    /* Centers the text inside the form */
+}
+
+/* Heading styles */
+.create-event h2 {
+    font-size: 4vh;
+    /* Larger font size for headings */
+    color: #1a1a1a;
+    margin-bottom: 1vh;
+}
+
+/* Styles for individual form elements */
+.form-group {
+    margin-bottom: 1vh;
+    /* Space between form groups */
+    text-align: left;
+    /* Aligns labels and inputs to the left */
+}
+
+/* Label styles */
+label {
+    display: block;
+    margin-bottom: 0;
+    /* No margin below the label */
+    color: #333;
+    font-weight: 600;
+    /* Bold font weight for labels */
+    font-size: 2.5vh;
+    /* Larger font size for readability */
+}
+
+/* Input, Textarea, and Select box styling */
+input,
+textarea,
+select {
+    width: 100%;
+    /* Full-width elements */
+    background-color: #f0f2f5;
+    /* Light grey background for input fields */
+    padding: 2vh;
+    /* Comfortable padding */
+    border: 0.3vh solid #3498db;
+    /* Blue border */
+    border-radius: 1vh;
+    /* Rounded corners */
+    color: #333;
+    /* Dark text for high contrast */
+    font-size: 2.2vh;
+    /* Legible font size */
+    transition: border-color 0.3s ease;
+    /* Smooth transition for focus effect */
+}
+
+/* Focus state styles */
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    /* Removes default outline */
+    border-color: #007bff;
+    /* Bright blue border on focus */
+    box-shadow: 0 0 0 0.5vh rgba(0, 123, 255, 0.25);
+    /* Subtle outer glow */
+}
+
+/* Button specific styles */
+button {
+    width: 100%;
+    /* Full width button */
+    padding: 2vh;
+    /* Vertical padding */
+    margin-top: 2vh;
+    /* Space above the button */
+    background: linear-gradient(135deg, #3498db, #2ecc71);
+    /* Gradient background */
+    color: white;
+    /* White text */
+    border: none;
+    /* No border */
+    border-radius: 1vh;
+    /* Rounded corners */
+    font-size: 2.5vh;
+    /* Larger font size */
+    font-weight: 600;
+    /* Bold text */
+    cursor: pointer;
+    /* Pointer cursor on hover */
+    transition: background 0.3s ease;
+    /* Smooth background color transition on hover */
+}
+
+/* Button hover state */
+button:hover {
+    background: #0056b3;
+    /* Darker blue on hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 50vh) {
+
+    /* Conditions for smaller devices */
+    .create-event {
+        width: 90vw;
+        /* Slightly more padding on smaller screens */
+        padding: 3vh;
+    }
+
+    .create-event h2 {
+        font-size: 3vh;
+        /* Smaller font size for smaller screens */
+    }
+
+    button {
+        font-size: 2vh;
+        /* Smaller button text */
+        padding: 1.5vh;
+        /* Less padding for buttons */
+    }
+}

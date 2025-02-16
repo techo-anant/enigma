@@ -9,7 +9,8 @@ import os
 app = Flask(__name__)
 CORS(app, resources={
     r"/upload-ics": {"origins": "*"},
-    r"/events": {"origins": "*"}
+    r"/events": {"origins": "*"},
+    r"/add_events": {"origins": "*"}
 }, supports_credentials=True)
 
 # SQLite database URI

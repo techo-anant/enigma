@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import './UploadICS.css';
 
 const UploadICS = () => {
   const [file, setFile] = useState(null);
@@ -25,21 +26,26 @@ const UploadICS = () => {
   };
 
   return (
-    <div>
-      <h2>Upload ICS File</h2>
-      <input type="file" accept=".ics" onChange={handleFileChange} />
-      <button onClick={uploadICS}>Upload</button>
+    <div className="container">
+      <div className="upload-container">
+        <h2>Upload ICS File</h2>
+        <input type="file" accept=".ics" onChange={handleFileChange} className="file-input" />
+        <button onClick={uploadICS} className="upload-button">Upload</button>
 
-      <h3>Events from ICS:</h3>
-      <ul>
-        {events.map((event, index) => (
-          <li key={index}>
-            {event.summary} - {new Date(event.start).toLocaleString()} to {new Date(event.end).toLocaleString()}
-          </li>
-        ))}
-      </ul>
+        <div className="events-container">
+          <h3>Events from ICS:</h3>
+          <ul className="events-list">
+            {events.map((event, index) => (
+              <li key={index}>
+                {event.summary} - {new Date(event.start).toLocaleString()} to {new Date(event.end).toLocaleString()}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
-};
+
+}
 
 export default UploadICS;

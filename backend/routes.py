@@ -59,14 +59,18 @@ def parse_ics(file_path):
     return events_list
 
 # Assuming necessary imports for db, models, and services are properly set up
-
-# Routes for calendar events and ICS processing
 @app.route('/add_events', methods=['POST'])
 def add_events():
+    # ✅ Ensure request is a POST request
+    if request.method != "POST":
+        return jsonify({"error": "Use POST method to create events"}), 405
+
+    # ✅ Ensure the request is JSON
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+
     try:
-        data = request.json
-        if not data:
-            return jsonify({'error': 'No data provided'}), 400
+        data = request.get_json()  # ✅ Use `get_json()` to safely parse JSON
 
         # Validate required fields
         required_fields = ['title', 'start_time']
@@ -74,21 +78,33 @@ def add_events():
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
 
+        # Convert start_time and end_time from ISO format
+        start_time = datetime.fromisoformat(data["start_time"])
+        end_time = datetime.fromisoformat(data["end_time"]) if data.get("end_time") else None
+
         # Create new event
         new_event = StudyEvent(
             title=data["title"],
             description=data.get("description", ""),
-            start_time=datetime.datetime.fromisoformat(data["start_time"]),
-            end_time=datetime.datetime.fromisoformat(data["end_time"]) if data.get("end_time") else None,
+            start_time=start_time,
+            end_time=end_time,
             link=data.get("link", ""),
         )
 
-        db.session.add(new_event)  # Fixed missing argument
+        db.session.add(new_event)
         db.session.commit()
+
         return jsonify({
-            "message": "Event added!",
-            "event_id": new_event.id  # Proper JSON structure
-        }), 201  # Use 201 Created for new resources
+            "message": "Event added successfully!",
+            "event_id": new_event.id,
+            "event": {
+                "title": new_event.title,
+                "description": new_event.description,
+                "start_time": new_event.start_time.isoformat(),
+                "end_time": new_event.end_time.isoformat() if new_event.end_time else None,
+                "link": new_event.link
+            }
+        }), 201  # HTTP 201 Created
 
     except Exception as e:
         db.session.rollback()
@@ -139,12 +155,13 @@ def get_events():
             print(f"\n🔎 Querying events for date: {selected_date}")
 
             # Fetch all events from database
-            all_events = CalendarEvent.query.all()
+            all_events = CalendarEvent.query.all() + StudyEvent.query.all()
+
 
             # ✅ Convert `start_time` to datetime object before filtering
             events = [
-                event for event in all_events
-                if str(event.start_time.date()) == selected_date
+                event for event in all_events 
+                if event.start_time.date() == selected_date
             ]
 
             print(f"\n✅ Found {len(events)} matching events.")
@@ -152,7 +169,7 @@ def get_events():
         except ValueError:
             return jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400
     else:
-        events = CalendarEvent.query.all()
+        events = CalendarEvent.query.all() + StudyEvent.query.all()
 
     # Convert events to JSON response
     events_data = [
@@ -161,8 +178,7 @@ def get_events():
             "title": event.title,
             "start_time": event.start_time,
             "end_time": event.end_time if event.end_time else None,
-            "description": event.description if event.description else "No description",
-            "location": event.location if event.location else "No location"
+            "description": event.description if event.description else "No description"
         }
         for event in events
     ]

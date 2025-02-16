@@ -48,40 +48,42 @@ const CreateEvent = () => {
   };
 
   return (
-    <div className="event-container">
-      <h2>Create Event</h2>
-      <input
-        type="text"
-        placeholder="Event Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
-      <textarea
-        placeholder="Event Description"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <br />
-      <label>Start Time:</label>
-      <DatePicker selected={startDate} onChange={setStartDate} showTimeSelect />
-      <br />
-      <label>End Time:</label>
-      <DatePicker selected={endDate} onChange={setEndDate} showTimeSelect isClearable />
-      <br />
-      <button onClick={createEvent}>Create Event</button>
+    <div className="create-event-container">
+      <div className="create-event">
+        <h2>Create Event</h2>
+        <input
+          type="text"
+          placeholder="Event Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <textarea
+          placeholder="Event Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+        <br />
+        <label>Start Time:</label>
+        <DatePicker selected={startDate} onChange={setStartDate} showTimeSelect />
+        <br />
+        <label>End Time:</label>
+        <DatePicker selected={endDate} onChange={setEndDate} showTimeSelect isClearable />
+        <br />
+        <button onClick={createEvent}>Create Event</button>
 
-      <h3>Created Events:</h3>
-      <ul>
-        {events.map((event, index) => (
-          <li key={index}>
-            <strong>{event.title}</strong> <br />
-            {new Date(event.start_time).toLocaleString()} -{" "}
-            {event.end_time ? new Date(event.end_time).toLocaleString() : "No End Time"}
-            <br />
-            {event.description}
-          </li>
-        ))}
-      </ul>
+        <h3>Created Events:</h3>
+        <ul>
+          {events.map((event, index) => (
+            <li key={index}>
+              <strong>{event.title}</strong> <br />
+              {new Date(event.start_time).toLocaleString()} -{" "}
+              {event.end_time ? new Date(event.end_time).toLocaleString() : "No End Time"}
+              <br />
+              {event.description}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
