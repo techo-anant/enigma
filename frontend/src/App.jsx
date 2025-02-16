@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./navbar";
 import UploadICS from "./UploadICS";
 import CreateEvent from "./CreateEvent";
+import BigCalendar from "./BigCalendar";
+import Achievements from "./Achievements";
 
 function App() {
   return (
@@ -13,6 +15,8 @@ function App() {
         <Route path="/UploadICS" element={<UploadICS />} />
         <Route path="/navbar" element={<Navbar />} />
         <Route path="/CreateEvent" element={<CreateEvent />} />
+        <Route path="/BigCalendar" element={<BigCalendar />} />
+        <Route path="/Achievements" element={<Achievements />} />
       </Routes>
     </Router>
   );
