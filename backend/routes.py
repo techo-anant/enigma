@@ -1,63 +1,105 @@
-from flask import request,app, jsonify
-from .services import *
-from . import *
-from .model import StudyEvent, CalendarEvent
-from icalendar import Calendar, Event
-import datetime
+from flask import request, jsonify, current_app
 from werkzeug.utils import secure_filename
+import datetime
+import os
+from icalendar import Calendar, Event
+from . import app, db
+from .services import extract_text_from_pdf
+from .model import StudyEvent, CalendarEvent
 
-#all the routes for notes like summarizing and extracting text from pdf
-@app.route('/pdf_text', methods=['POST'])
-def extract_text():
-    if "file" not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
 
-    file = request.files["file"]
-    if file.filename == "":
-        return jsonify({"error": "Empty filename"}), 400
+def parse_ics(file_path):
+    events_list = []
 
-    # Save uploaded PDF temporarily
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(file_path)
+    try:
+        with open(file_path, "rb") as f:
+            calendar = Calendar.from_ical(f.read())
 
-    # Extract text from PDF
-    extracted_text = extract_text_from_pdf(file_path)
+        with app.app_context():  # Ensure database operations are inside app context
+            for component in calendar.walk():
+                if component.name == "VEVENT":
+                    try:
+                        start_time = component.get("dtstart").dt
+                        end_time = component.get("dtend").dt if component.get("dtend") else None
 
-    # Summarize extracted text
-    summarized_text = summarize(extracted_text)
+                        if isinstance(start_time, datetime.date) and not isinstance(start_time, datetime.datetime):
+                            start_time = datetime.datetime.combine(start_time, datetime.time.min)
+                        if end_time and isinstance(end_time, datetime.date) and not isinstance(end_time, datetime.datetime):
+                            end_time = datetime.datetime.combine(end_time, datetime.time.min)
 
-    # Delete file after processing
-    os.remove(file_path)
+                        new_event = CalendarEvent(
+                            title=str(component.get("summary", "No Title")),
+                            description=str(component.get("description", "No Description")),
+                            start_time=start_time.isoformat(),
+                            end_time=end_time.isoformat() if end_time else None,
+                            location=str(component.get("location", "No Location")),
+                        )
 
-    return jsonify({
-        "summary": summarized_text
-    })
+                        db.session.add(new_event)
+                        events_list.append({
+                            "title": new_event.title,
+                            "start_time": start_time.isoformat(),
+                            "end_time": end_time.isoformat() if end_time else None,
+                            "location": new_event.location
+                        })
 
-#routes for Calendar events and ICS file generation
+                    except Exception as e:
+                        current_app.logger.error(f"Error processing event: {str(e)}")
+                        continue  # Skip to the next event
+
+            db.session.commit()
+
+    except Exception as e:
+        with app.app_context():  # Ensure rollback is inside the app context
+            db.session.rollback()
+        current_app.logger.error(f"Database error: {str(e)}")
+        raise
+
+    return events_list
+
+# Assuming necessary imports for db, models, and services are properly set up
+
+# Routes for calendar events and ICS processing
 @app.route('/add_events', methods=['POST'])
 def add_events():
     try:
         data = request.json
-        if not data or 'event_name' not in data:
-            return jsonify({'error': 'Event name is required'}), 400 # Bad request
-        new_event = StudyEvent(
-        title=data["title"],
-        description=data.get("description", ""),
-        start_time=datetime.datetime.fromisoformat(data["start_time"]),
-        end_time=datetime.datetime.fromisoformat(data["end_time"]) if data.get("end_time") else None,
-        link=data.get("link", ""),
-    )
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
 
-        db.session.add()
+        # Validate required fields
+        required_fields = ['title', 'start_time']
+        for field in required_fields:
+            if field not in data:
+                return jsonify({'error': f'Missing required field: {field}'}), 400
+
+        # Create new event
+        new_event = StudyEvent(
+            title=data["title"],
+            description=data.get("description", ""),
+            start_time=datetime.datetime.fromisoformat(data["start_time"]),
+            end_time=datetime.datetime.fromisoformat(data["end_time"]) if data.get("end_time") else None,
+            link=data.get("link", ""),
+        )
+
+        db.session.add(new_event)  # Fixed missing argument
         db.session.commit()
-        return jsonify({'message': f'Event added!", "event_id": {new_event.id}'}), 200 # OK
+        return jsonify({
+            "message": "Event added!",
+            "event_id": new_event.id  # Proper JSON structure
+        }), 201  # Use 201 Created for new resources
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 
-@app.route("/upload-ics", methods=["POST"])
+@app.route("/upload-ics", methods=["POST", "GET"])
 def upload_ics():
+    if request.method == "GET":  # Fixed method check
+        return jsonify({"message": "Upload an ICS file "
+                                   "using POST"}), 200
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -65,51 +107,23 @@ def upload_ics():
     if file.filename == "":
         return jsonify({"error": "Empty filename"}), 400
 
-    # Secure the filename and save the file
-    file_path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
-    file.save(file_path)
+    try:
+        # File handling
+        UPLOAD_FOLDER = current_app.config.get('UPLOAD_FOLDER', '/tmp')
+        os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
 
-    # Parse the ICS file and store events
-    extracted_events = parse_ics(file_path)
-    return jsonify({"message": "Events extracted and stored!", "events": extracted_events})
-
-
-def parse_ics(file_path):
-    with open(file_path, "rb") as f:
-        calendar = Calendar.from_ical(f.read())
-
-    events_list = []
-    with app.app_context():
-        for component in calendar.walk():
-            if component.name == "VEVENT":
-                title = str(component.get("summary", "No Title"))
-                description = str(component.get("description", "No Description"))
-                start_time = str(component.get("dtstart").dt)
-                end_time = str(component.get("dtend").dt) if component.get("dtend") else None
-                location = str(component.get("location", "No Location"))
-
-                # Store event in the database
-                new_event = CalendarEvent(
-                    title=title,
-                    description=description,
-                    start_time=start_time,
-                    end_time=end_time,
-                    location=location,
-                )
-                db.session.add(new_event)
-                db.session.commit()
-
-                # Append to list for response
-                events_list.append({
-                    "title": title,
-                    "description": description,
-                    "start_time": start_time,
-                    "end_time": end_time,
-                    "location": location,
-                })
-
-    return events_list
-
-
-
+        # Process ICS
+        events_list = parse_ics(file_path)
+        return jsonify({
+            "message": "Events extracted and stored!",
+            "events": events_list
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        if os.path.exists(file_path):
+            os.remove(file_path)
 
