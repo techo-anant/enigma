@@ -10,12 +10,13 @@ const BigCalendar = () => {
     const [events, setEvents] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
     const [filteredEvents, setFilteredEvents] = useState([]);
+    const [date, setDate] = useState(new Date()); // Track current calendar date
+    const [view, setView] = useState("month"); // Track current view (month/week/day)
 
     // Fetch all events when the component loads
     useEffect(() => {
         axios.get("http://localhost:5000/events")
             .then((response) => {
-                // Convert event date strings to Date objects
                 const formattedEvents = response.data.map(event => ({
                     ...event,
                     start: new Date(event.start),
@@ -26,28 +27,24 @@ const BigCalendar = () => {
             .catch((error) => console.error("Error fetching events:", error));
     }, []);
 
-    // Fetch events for a selected date
     const handleSelectSlot = async ({ start }) => {
         setSelectedDate(start);
         const formattedDate = moment(start).format("YYYY-MM-DD");
 
         try {
             const response = await axios.get(`http://localhost:5000/events?date=${formattedDate}`);
-
-            // ✅ Ensure correct mapping from Flask API response
             const selectedEvents = response.data.map(event => ({
                 id: event.id,
                 title: event.title,
-                start: moment(event.start_time).toDate(),  // Convert ISO 8601 string to Date
+                start: moment(event.start_time).toDate(),
                 end: event.end_time ? moment(event.end_time).toDate() : null,
                 description: event.description,
                 location: event.location
             }));
-
             setFilteredEvents(selectedEvents);
         } catch (error) {
             console.error("Error fetching events for date:", error);
-            setFilteredEvents([]); // Reset if error
+            setFilteredEvents([]);
         }
     };
 
@@ -60,12 +57,15 @@ const BigCalendar = () => {
                 startAccessor="start"
                 endAccessor="end"
                 selectable
-                onSelectSlot={handleSelectSlot} // Click to fetch events for that date
+                onSelectSlot={handleSelectSlot}
                 style={{ height: "500px" }}
                 views={["month", "week", "day", "agenda"]}
+                date={date} // Controlled current date
+                view={view} // Controlled current view
+                onNavigate={setDate} // Update date on navigation
+                onView={setView} // Update view when changing views
             />
 
-            {/* Show Event Details Modal when date is clicked */}
             {selectedDate && (
                 <div className="event-details">
                     <h3>Events on {moment(selectedDate).format("MMMM Do, YYYY")}</h3>

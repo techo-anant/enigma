@@ -2,45 +2,71 @@ import React, { useState } from "react";
 import axios from "axios";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import './CreateEvent.css'
+import './CreateEvent.css';
 
 const CreateEvent = () => {
-  const [summary, setSummary] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(null);
   const [events, setEvents] = useState([]);
 
   const createEvent = async () => {
-    const event = {
-      summary,
-      start: startDate.toISOString(),
-      end: endDate.toISOString(),
+    if (!title.trim()) {
+      alert("Title is required!");
+      return;
+    }
+
+    const eventData = {
+      title: title,  // Correct key-value format
+      description: description,
+      start_time: startDate.toISOString(),
+      end_time: endDate ? endDate.toISOString() : null,
     };
 
     try {
-      const res = await axios.post("http://localhost:5000/create-event", event);
-      setEvents(res.data.events);
-      alert("Event created and saved as ICS!");
+      const res = await axios.post("http://localhost:5000/add_events", eventData, {
+        headers: {
+          "Content-Type": "application/json" // ✅ Ensure JSON content type
+        }
+      });
+
+      setEvents([...events, res.data.event]); // Append new event to list
+      alert("Event created successfully!");
+      resetForm();
     } catch (error) {
-      alert("Error creating event: " + error.response.data.error);
+      console.error("Error creating event:", error);
+      alert("Error creating event: " + (error.response?.data?.error || error.message));
     }
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setStartDate(new Date());
+    setEndDate(null);
+  };
+
   return (
-    <div>
+    <div className="event-container">
       <h2>Create Event</h2>
       <input
         type="text"
-        placeholder="Event Summary"
-        value={summary}
-        onChange={(e) => setSummary(e.target.value)}
+        placeholder="Event Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+      />
+      <textarea
+        placeholder="Event Description"
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
       />
       <br />
       <label>Start Time:</label>
-      <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} showTimeSelect />
+      <DatePicker selected={startDate} onChange={setStartDate} showTimeSelect />
       <br />
       <label>End Time:</label>
-      <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} showTimeSelect />
+      <DatePicker selected={endDate} onChange={setEndDate} showTimeSelect isClearable />
       <br />
       <button onClick={createEvent}>Create Event</button>
 
@@ -48,7 +74,11 @@ const CreateEvent = () => {
       <ul>
         {events.map((event, index) => (
           <li key={index}>
-            {event.summary} - {new Date(event.start).toLocaleString()} to {new Date(event.end).toLocaleString()}
+            <strong>{event.title}</strong> <br />
+            {new Date(event.start_time).toLocaleString()} -{" "}
+            {event.end_time ? new Date(event.end_time).toLocaleString() : "No End Time"}
+            <br />
+            {event.description}
           </li>
         ))}
       </ul>
