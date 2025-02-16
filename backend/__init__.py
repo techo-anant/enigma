@@ -7,7 +7,10 @@ import os
 
 # Create an instance of a class flask
 app = Flask(__name__)
-CORS(app, resources={r"/upload-ics": {"origins": '*'}}, supports_credentials=True)
+CORS(app, resources={
+    r"/upload-ics": {"origins": "*"},
+    r"/events": {"origins": "*"}
+}, supports_credentials=True)
 
 # SQLite database URI
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # SQLite database URI

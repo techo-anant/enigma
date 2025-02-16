@@ -1,6 +1,7 @@
 from flask import request, jsonify, current_app
 from werkzeug.utils import secure_filename
-import datetime
+from datetime import *
+from sqlalchemy import cast, Date, func
 import os
 from icalendar import Calendar, Event
 from . import app, db
@@ -127,3 +128,43 @@ def upload_ics():
         if os.path.exists(file_path):
             os.remove(file_path)
 
+
+@app.route("/events", methods=["GET"])
+def get_events():
+    date_str = request.args.get("date")  # Example: /events?date=2024-09-05
+
+    if date_str:
+        try:
+            selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            print(f"\n🔎 Querying events for date: {selected_date}")
+
+            # Fetch all events from database
+            all_events = CalendarEvent.query.all()
+
+            # ✅ Convert `start_time` to datetime object before filtering
+            events = [
+                event for event in all_events
+                if str(event.start_time.date()) == selected_date
+            ]
+
+            print(f"\n✅ Found {len(events)} matching events.")
+
+        except ValueError:
+            return jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400
+    else:
+        events = CalendarEvent.query.all()
+
+    # Convert events to JSON response
+    events_data = [
+        {
+            "id": event.id,
+            "title": event.title,
+            "start_time": event.start_time,
+            "end_time": event.end_time if event.end_time else None,
+            "description": event.description if event.description else "No description",
+            "location": event.location if event.location else "No location"
+        }
+        for event in events
+    ]
+
+    return jsonify(events_data), 200
