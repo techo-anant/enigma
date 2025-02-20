@@ -22,7 +22,7 @@ Enigma is an AI-powered study tool designed to help students summarize notes, ge
 ### **Frontend:**
 - **React** - User-friendly interface.
 - **Axios** - Handle API requests.
-- **Tailwind CSS** - For styling.
+- **CSS** - For styling.
 
 ## 🖥️ Installation & Setup
 ### 1️⃣ **Clone the Repository**
